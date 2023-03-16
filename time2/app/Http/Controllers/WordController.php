@@ -30,6 +30,11 @@ class WordController extends Controller
     private $fancyTableFontStyle = array('bold' => true,
         'lineHeight' => 1);
 
+
+    // generateDocx method: This method is responsible for generating the docx file.
+    // It takes an instance of Illuminate\Http\Request as input, retrieves the start
+    // and end dates from the request, and generates a table for each week between those dates.
+    // Finally, it generates the page with the required signature lines and returns the generated file.
     public function generateDocx(Request $request)
     {
         $phpWord = new PhpWord();
@@ -73,6 +78,12 @@ class WordController extends Controller
      * @param Carbon $startDate
      * @return mixed
      */
+
+    // This method generates a table for a given week. It takes a Carbon object as input, which represents
+    // the start date of the week. It creates a new table with the style defined in the class properties
+    // and adds a row to display the week number and the total worked hours for that week. Then, it adds
+    // a row for each day of the week, displaying the day of the week, the start and end times, and the
+    // total worked time.
     public function generateTable($section, Carbon $startDate)
     {
         $noSpace = array('spaceAfter' => 0);
@@ -84,7 +95,14 @@ class WordController extends Controller
         $table->addCell(2000, $this->fancyTableCellStyle)->addText('Van', $this->fancyTableFontStyle, $noSpace);
         $table->addCell(2000, $this->fancyTableCellStyle)->addText('Tot', $this->fancyTableFontStyle, $noSpace);
         $table->addCell(2000, $this->fancyTableCellStyle)->addText('Totaal gewerkt:' . $this->getTotalTime($startDate), $this->fancyTableFontStyle, $noSpace);
-// loopen door de dagen 7 dagen in de week
+
+        // For each iteration, the code initializes four variables to null: $start, $end, $workedTime, and $vrij.
+        //
+        // It then queries the database using the Eloquent ORM in Laravel to find a record in the "Time" table where the "start"
+        // date matches a given date ($startDate). If a record is found, it sets the values of $start, $end, and $workedTime
+        // based on the corresponding fields in the database record, and sets $vrij to null. If no record is found, $vrij remains set to 'X'.
+        //
+        // The "->format('H:i')" method is used to format the "start" and "end" fields as strings representing the hours and minutes in 24-hour format (e.g. "13:45").
         for ($i = 0; $i < 7; $i++) {
             $start = null;
             $end = null;
@@ -115,11 +133,17 @@ class WordController extends Controller
     }
 
     /**
-     * Start tellen bij maandag op basis van datum
      * @param Carbon $date
      * @param $startDate
      * @param $endDate
      */
+
+    // This code calculates the total worked time between Monday and Sunday of a given week.
+    // It first calculates the start and end dates (Monday and Sunday) based on the input date,
+    // and then retrieves all the time entries that fall within that week.
+    // It then loops through those time entries and calculates the total worked hours by adding up
+    // the hour and minute components of each entry. Finally, it formats the total worked hours into
+    // a string in the format "hh:mm" and returns it.
     private function getTotalTime(Carbon $date)
     {
         $monday = $date->copy();
@@ -142,7 +166,7 @@ class WordController extends Controller
 
         return $time;
     }
-
+//  Generates the word document to the browser :)
     public function generatePage($phpWord)
     {
         $objWriter = IOFactory::createWriter($phpWord, 'Word2007');
